@@ -6,7 +6,7 @@ A visual explainer for [Cursor Python SDK](https://cursor.com/docs/sdk/python) a
 
 <img src="assets/screenshot.png" alt="Cursor SDK Flight Recorder Streamlit welcome screen" width="900">
 
-_Real app UI on first visit. Click **Load demo run** to see the timeline, metrics, event table, review checks, and report export._
+*Real app UI on first visit. Click **Load demo run** to see the timeline, metrics, event table, review checks, and report export.*
 
 ## Why this exists
 
@@ -25,8 +25,6 @@ Flight Recorder does five things:
 3. Shows the run as a timeline and table.
 4. Runs basic review checks.
 5. Exports a Markdown/HTML report.
-
-**Simple story:** Run a Cursor SDK agent, record the run, understand what happened, share the result.
 
 ```mermaid
 flowchart LR
@@ -97,7 +95,7 @@ Common event types include `system`, `user`, `assistant`, `tool`, `status`, `gat
 ## Three ways to use it
 
 | Path | API key? | What happens | Best for |
-| --- | --- | --- | --- |
+|------|----------|--------------|----------|
 | Learn with demo data | No | Loads `fixtures/demo_trace.jsonl` | First-time users |
 | Run Cursor SDK on a local repo | Yes | Runs the SDK against a local folder | Local SDK experiments |
 | Review a saved trace | No | Uploads a JSONL trace | Inspecting previous runs |
@@ -105,7 +103,7 @@ Common event types include `system`, `user`, `assistant`, `tool`, `status`, `gat
 ## What the dashboard shows
 
 | Area | What you see |
-| --- | --- |
+|------|--------------|
 | Welcome | What the app does and how to start |
 | Metrics | Event count, duration, tool events, review checks passed |
 | Timeline | Order of events during the run |
