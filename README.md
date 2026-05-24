@@ -49,7 +49,7 @@ flowchart LR
 |----------|--------|
 | What is this? | A small Streamlit app + Python library for inspecting SDK-style agent runs |
 | Why use it? | See *how* a run unfolded, not only the final text |
-| What does it load? | A **trace** (JSONL events)—not “opening” a repo as the main action |
+| What does it load? | A **trace** (JSONL events), not opening a repo as the main action |
 
 ---
 
@@ -109,7 +109,7 @@ flowchart TB
 *Optional workflow graphic (same story as the diagram above).*
 
 **What the Cursor SDK does here (live path only):**  
-When you choose **Run Cursor SDK on a local repo**, this project calls the official Python SDK (`Agent.create`, `run.messages()`, `run.wait()`), maps stream messages into a normalized trace, and displays them. Demo and upload paths **do not** call the SDK—they load existing JSONL.
+When you choose **Run Cursor SDK on a local repo**, this project calls the official Python SDK (`Agent.create`, `run.messages()`, `run.wait()`), maps stream messages into a normalized trace, and displays them. Demo and upload paths **do not** call the SDK. They load existing JSONL.
 
 ---
 
@@ -125,7 +125,7 @@ Example event shape (simplified):
   "type": "user",
   "role": "user",
   "summary": "User prompt received",
-  "content": "Summarize this repository…",
+  "content": "Summarize this repository...",
   "status": "info",
   "metadata": {}
 }
@@ -135,11 +135,11 @@ Common `type` values: `system`, `user`, `assistant`, `tool`, `status`, `gate`, `
 
 ```mermaid
 flowchart LR
-    subgraph Trace file
-        E1[Event 1: system]
-        E2[Event 2: user prompt]
-        E3[Event 3: tool / assistant …]
-        E4[Event N: result]
+    subgraph trace_file[Trace file]
+        E1[Event 1 system]
+        E2[Event 2 user prompt]
+        E3[Event 3 tool or assistant]
+        E4[Event N result]
     end
     E1 --> E2 --> E3 --> E4
 ```
@@ -150,7 +150,7 @@ flowchart LR
 | `fixtures/live_sample_redacted.jsonl` | Partial **real** SDK capture (advanced; see caveats) |
 | Your upload | Any compatible JSONL you exported elsewhere |
 
-**Load demo run** loads a trace file—it does **not** clone or import a Git repository into the app.
+**Load demo run** loads a trace file. It does **not** clone or import a Git repository into the app.
 
 ---
 
@@ -161,7 +161,7 @@ flowchart TD
     Start([Open Flight Recorder]) --> P1[Learn with demo data]
     Start --> P2[Run SDK on local repo]
     Start --> P3[Review saved trace]
-    P1 --> D[Load fixtures/demo_trace.jsonl]
+    P1 --> D[Load demo_trace.jsonl fixture]
     P2 --> S[Cursor SDK against local folder]
     P3 --> J[Upload .jsonl]
     D --> View[Timeline + checks + report]
@@ -171,8 +171,8 @@ flowchart TD
 
 ### 1. Learn with demo data
 
-| | |
-|--|--|
+| Item | Detail |
+|------|--------|
 | **Best for** | First visit, workshops, CI, no setup |
 | **Loads** | `fixtures/demo_trace.jsonl` (synthetic) |
 | **Credentials** | Not required |
@@ -180,8 +180,8 @@ flowchart TD
 
 ### 2. Run Cursor SDK on a local repo
 
-| | |
-|--|--|
+| Item | Detail |
+|------|--------|
 | **Best for** | Capturing a fresh run from your machine |
 | **Runs** | `cursor-sdk` against a **local directory** |
 | **Credentials** | Required in `.env` (gitignored) |
@@ -191,8 +191,8 @@ Built-in example prompts are **read-only** (they ask the agent not to modify fil
 
 ### 3. Review a saved trace
 
-| | |
-|--|--|
+| Item | Detail |
+|------|--------|
 | **Best for** | Inspecting a trace you already saved |
 | **Loads** | Your `.jsonl` upload |
 | **Credentials** | Not required |
@@ -202,11 +202,11 @@ Built-in example prompts are **read-only** (they ask the agent not to modify fil
 
 ```mermaid
 flowchart LR
-    subgraph Demo["Demo / upload"]
+    subgraph demo_path[Demo or upload]
         A1[Pre-built or uploaded JSONL]
         A2[Instant dashboard]
     end
-    subgraph Live["Live SDK path"]
+    subgraph live_path[Live SDK path]
         B1[Local folder]
         B2[SDK agent run]
         B3[Trace built from stream]
@@ -216,8 +216,8 @@ flowchart LR
     B1 --> B2 --> B3 --> B4
 ```
 
-| | Demo / upload | Live SDK |
-|--|---------------|----------|
+| Item | Demo or upload | Live SDK |
+|------|----------------|----------|
 | Calls Cursor SDK? | No | Yes |
 | Needs credentials? | No | Yes |
 | Trace source | Fixture or file | Current session |
@@ -231,11 +231,11 @@ The UI is a **step-based sidebar** plus a main area with metrics, tabs, and expo
 
 ```mermaid
 flowchart TB
-    SB[Sidebar: path → repo → prompt → run/load → export]
+    SB[Sidebar steps]
     M[Metrics row]
     T[Timeline tab]
     S[Event summary chart]
-    TB[Event table]
+    TabTable[Event table]
     PA[Prompt and answer]
     RC[Review checks]
     RP[Report preview]
@@ -243,7 +243,7 @@ flowchart TB
     SB --> M
     M --> T
     M --> S
-    M --> TB
+    M --> TabTable
     M --> PA
     M --> RC
     M --> RP
@@ -273,7 +273,7 @@ flowchart TB
 | Supported | Not supported yet |
 |-----------|-------------------|
 | Local folder path (e.g. `examples/tiny_repo`) | Remote GitHub URL in the app |
-| Clone a repo, then point at the clone | Direct “run against github.com/org/repo” |
+| Clone a repo, then point at the clone | Direct run against github.com org repo URL |
 | Demo JSONL trace (no repo needed to view) | Multi-run comparison UI |
 
 ```mermaid
@@ -288,7 +288,7 @@ flowchart LR
 - **Review checks** (e.g. does the folder exist?),
 - **Live SDK runs** (SDK `cwd`),
 
-—not as a substitute for loading a trace when you use demo data.
+- not as a substitute for loading a trace when you use demo data.
 
 ---
 
@@ -306,7 +306,7 @@ Be precise about what this repo proves:
 
 Under **Advanced → inspect redacted live SDK timeout sample**:
 
-`fixtures/live_sample_redacted.jsonl` is a **partial real** local SDK capture that ended in a **bridge timeout** (`run_status=error`). It shows that status/error events can be recorded safely after redaction—it is **not** a full successful tool-rich agent run.
+`fixtures/live_sample_redacted.jsonl` is a **partial real** local SDK capture that ended in a **bridge timeout** (`run_status=error`). It shows that status/error events can be recorded safely after redaction. It is **not** a full successful tool-rich agent run.
 
 ---
 
@@ -354,7 +354,7 @@ flowchart LR
     B --> C[Normalized JSONL trace]
     C --> D[Streamlit dashboard]
     C --> E[Review gates]
-    D --> F[Markdown / HTML report]
+    D --> F[Markdown and HTML report]
     E --> F
 ```
 
@@ -362,20 +362,20 @@ flowchart LR
 
 ```mermaid
 flowchart TB
-    app[app.py Streamlit UI]
-    runner[src/runner.py live SDK]
-    trace[src/trace.py JSONL I/O]
-    gates[src/gates.py review checks]
-    report[src/report.py export]
-    visuals[src/visuals.py charts]
-    redact[src/redact.py fixture redaction]
-    app --> trace
-    app --> gates
-    app --> report
-    app --> visuals
-    app --> runner
-    runner --> trace
-    gates --> report
+    app_node[app.py Streamlit UI]
+    runner_node[runner.py live SDK]
+    trace_node[trace.py JSONL IO]
+    gates_node[gates.py review checks]
+    report_node[report.py export]
+    visuals_node[visuals.py charts]
+    redact_node[redact.py fixture redaction]
+    app_node --> trace_node
+    app_node --> gates_node
+    app_node --> report_node
+    app_node --> visuals_node
+    app_node --> runner_node
+    runner_node --> trace_node
+    gates_node --> report_node
 ```
 
 ---
@@ -385,19 +385,13 @@ flowchart TB
 <details>
 <summary><strong>Generated overview images (click to expand)</strong></summary>
 
-<br>
-
 <img src="assets/hero-flight-recorder.png" alt="Flight Recorder overview graphic" width="900">
 
 *Overview graphic.*
 
-<br>
-
 <img src="assets/sdk-modes.png" alt="Three ways to use Flight Recorder" width="900">
 
 *Three usage paths (illustration).*
-
-<br>
 
 <img src="assets/dashboard-callouts.png" alt="Dashboard areas callouts" width="900">
 
