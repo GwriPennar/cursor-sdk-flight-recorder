@@ -47,7 +47,7 @@ Flight Recorder does five things:
 ## Quick start
 
 ```bash
-git clone https://github.com/Gwripennar/cursor-sdk-flight-recorder.git
+git clone https://github.com/GwriPennar/cursor-sdk-flight-recorder.git
 cd cursor-sdk-flight-recorder
 python3 -m venv .venv
 source .venv/bin/activate   # Windows: .venv\Scripts\activate
@@ -154,7 +154,7 @@ CI: `.github/workflows/ci.yml` (Python 3.11 and 3.13, no API key).
 After publishing to GitHub, you can add:
 
 ```markdown
-![CI](https://github.com/Gwripennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml/badge.svg)
 ```
 
 ## Roadmap
