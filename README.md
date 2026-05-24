@@ -4,45 +4,54 @@ A visual explainer for [Cursor Python SDK](https://cursor.com/docs/sdk/python) a
 
 **Run a Cursor SDK agent on a local repo, record what happened, review the trace, and export a report.**
 
-## App screenshot
+<img src="assets/screenshot.png" alt="Cursor SDK Flight Recorder Streamlit welcome screen" width="900">
 
-![Flight Recorder Streamlit UI — welcome screen](assets/screenshot.png)
+*Real Streamlit welcome screen. Click **Load demo run** to see the metrics, timeline, event table, review checks, and report export.*
 
-*Real app UI on first visit (onboarding + step-based sidebar). Click **Load demo run** to see the timeline, metrics, and review checks.*
+---
 
-![Flight Recorder overview](assets/hero-flight-recorder.png)
+## Why this exists
 
-*Overview graphic for the project README.*
+The [Cursor Python SDK](https://cursor.com/docs/sdk/python) lets you run coding agents from Python scripts, automation, or local tools. That is powerful, but programmatic runs can feel invisible: you send a prompt, wait, and get an answer or an error—with little sense of *what happened in between*.
 
-## How it works
+**Flight Recorder** makes a run easier to understand by turning it into:
 
-```mermaid
-flowchart LR
-    A[Local repo or demo trace] --> B[Cursor SDK run or saved trace]
-    B --> C[JSONL event trace]
-    C --> D[Timeline and review checks]
-    D --> E[Shareable report]
-```
+- a **visible event trace** (JSONL),
+- a **Streamlit dashboard** (timeline, table, charts),
+- **review checks** before you share anything,
+- and an **exportable report** (Markdown/HTML).
 
-![Run, record, understand, share](assets/workflow-run-record-understand-share.png)
+This repo is a **public-safe educational demo**. It is not a production observability platform—it is a clear place to learn how SDK runs can be recorded and reviewed.
+
+---
 
 ## What it does
 
 Flight Recorder does five things:
 
 1. **Runs or loads** a Cursor SDK-style agent run (demo fixture, local SDK, or your JSONL file)
-2. **Records** the run as JSONL events
+2. **Records** each step as JSONL events
 3. **Shows** the run as a timeline and table
-4. **Runs** basic review checks (prompt present, no secret-like text, report builds, and more)
+4. **Runs** basic review checks (prompt present, safety scan, report builds, and more)
 5. **Exports** a Markdown/HTML report you can share
 
 **Simple story:** Run a Cursor SDK agent → record the run → understand what happened → share the result.
 
-## Who it is for
+```mermaid
+flowchart LR
+    A[Run or load] --> B[Record events]
+    B --> C[Understand timeline]
+    C --> D[Review checks]
+    D --> E[Share report]
+```
 
-- Developers learning the Cursor Python SDK
-- Teams trying programmable coding agents in a small, reviewable way
-- Anyone who wants a plain record of what an agent run did—not just the final answer
+| Question | Answer |
+|----------|--------|
+| What is this? | A small Streamlit app + Python library for inspecting SDK-style agent runs |
+| Why use it? | See *how* a run unfolded, not only the final text |
+| What does it load? | A **trace** (JSONL events)—not “opening” a repo as the main action |
+
+---
 
 ## Quick start
 
@@ -56,89 +65,259 @@ python -m pytest
 streamlit run app.py
 ```
 
-Open [http://localhost:8501](http://localhost:8501) and click **Load demo run**. No API key required.
+Open [http://localhost:8501](http://localhost:8501) and click **Load demo run**. No credentials required for demo mode.
 
-Optional local SDK:
+**Optional — local Cursor SDK run:**
 
 ```bash
 pip install -e ".[dev,sdk]"
-cp .env.example .env   # add your key locally — never commit .env
+cp .env.example .env   # add credentials locally — never commit .env
 ```
+
+In the app: **Step 1 → Run Cursor SDK on a local repo** → set **local repo path** → **Run SDK agent**.
+
+---
+
+## How it works
+
+```mermaid
+flowchart TB
+    subgraph Input
+        D[Demo fixture JSONL]
+        L[Local folder + Cursor SDK]
+        U[Uploaded JSONL file]
+    end
+    subgraph Core
+        T[Normalized event trace]
+        V[Streamlit dashboard]
+        G[Review checks]
+    end
+    subgraph Output
+        R[Markdown / HTML report]
+    end
+    D --> T
+    L --> T
+    U --> T
+    T --> V
+    T --> G
+    V --> R
+    G --> R
+```
+
+<img src="assets/workflow-run-record-understand-share.png" alt="Workflow: run, record, understand, share" width="900">
+
+*Optional workflow graphic (same story as the diagram above).*
+
+**What the Cursor SDK does here (live path only):**  
+When you choose **Run Cursor SDK on a local repo**, this project calls the official Python SDK (`Agent.create`, `run.messages()`, `run.wait()`), maps stream messages into a normalized trace, and displays them. Demo and upload paths **do not** call the SDK—they load existing JSONL.
+
+---
+
+## What is a trace?
+
+A **trace** is a **JSONL file**: one JSON object per line, each object an **event** from a run.
+
+Example event shape (simplified):
+
+```json
+{
+  "timestamp": "2026-05-24T10:00:01+00:00",
+  "type": "user",
+  "role": "user",
+  "summary": "User prompt received",
+  "content": "Summarize this repository…",
+  "status": "info",
+  "metadata": {}
+}
+```
+
+Common `type` values: `system`, `user`, `assistant`, `tool`, `status`, `gate`, `warning`, `error`, `self_eval`.
+
+```mermaid
+flowchart LR
+    subgraph Trace file
+        E1[Event 1: system]
+        E2[Event 2: user prompt]
+        E3[Event 3: tool / assistant …]
+        E4[Event N: result]
+    end
+    E1 --> E2 --> E3 --> E4
+```
+
+| File | What it is |
+|------|------------|
+| `fixtures/demo_trace.jsonl` | Synthetic educational trace (11 events) |
+| `fixtures/live_sample_redacted.jsonl` | Partial **real** SDK capture (advanced; see caveats) |
+| Your upload | Any compatible JSONL you exported elsewhere |
+
+**Load demo run** loads a trace file—it does **not** clone or import a Git repository into the app.
+
+---
 
 ## Three ways to use it
 
-### Learn with demo data
+```mermaid
+flowchart TD
+    Start([Open Flight Recorder]) --> P1[Learn with demo data]
+    Start --> P2[Run SDK on local repo]
+    Start --> P3[Review saved trace]
+    P1 --> D[Load fixtures/demo_trace.jsonl]
+    P2 --> S[Cursor SDK against local folder]
+    P3 --> J[Upload .jsonl]
+    D --> View[Timeline + checks + report]
+    S --> View
+    J --> View
+```
 
-- Sidebar: **Step 1 → Learn with demo data** → **Load demo run**
-- Loads `fixtures/demo_trace.jsonl` (synthetic trace)
-- **No API key**
-- Best first step to learn the UI
+### 1. Learn with demo data
 
-### Run Cursor SDK on a local repo
+| | |
+|--|--|
+| **Best for** | First visit, workshops, CI, no setup |
+| **Loads** | `fixtures/demo_trace.jsonl` (synthetic) |
+| **Credentials** | Not required |
+| **In the app** | Step 1 → **Learn with demo data** → **Load demo run** |
 
-- Sidebar: **Step 1 → Run Cursor SDK on a local repo**
-- Set **local repo path** (folder on your machine)
-- Pick a built-in example prompt or write your own
-- Click **Run SDK agent**
-- Requires `cursor-sdk` and credentials in `.env`
+### 2. Run Cursor SDK on a local repo
 
-### Review a saved trace
+| | |
+|--|--|
+| **Best for** | Capturing a fresh run from your machine |
+| **Runs** | `cursor-sdk` against a **local directory** |
+| **Credentials** | Required in `.env` (gitignored) |
+| **In the app** | Step 1 → **Run Cursor SDK on a local repo** → path + example prompt → **Run SDK agent** |
 
-- Sidebar: **Step 1 → Review a saved trace**
-- Upload a `.jsonl` file (one JSON event per line)
-- Click **Load trace**
-- **No API key** needed to inspect an existing trace
+Built-in example prompts are **read-only** (they ask the agent not to modify files).
 
-![Three ways to use Flight Recorder](assets/sdk-modes.png)
+### 3. Review a saved trace
+
+| | |
+|--|--|
+| **Best for** | Inspecting a trace you already saved |
+| **Loads** | Your `.jsonl` upload |
+| **Credentials** | Not required |
+| **In the app** | Step 1 → **Review a saved trace** → upload → **Load trace** |
+
+### Demo vs live SDK
+
+```mermaid
+flowchart LR
+    subgraph Demo["Demo / upload"]
+        A1[Pre-built or uploaded JSONL]
+        A2[Instant dashboard]
+    end
+    subgraph Live["Live SDK path"]
+        B1[Local folder]
+        B2[SDK agent run]
+        B3[Trace built from stream]
+        B4[Dashboard]
+    end
+    A1 --> A2
+    B1 --> B2 --> B3 --> B4
+```
+
+| | Demo / upload | Live SDK |
+|--|---------------|----------|
+| Calls Cursor SDK? | No | Yes |
+| Needs credentials? | No | Yes |
+| Trace source | Fixture or file | Current session |
+| Guaranteed rich trace? | Demo is complete synthetic story | **No** — beta SDK, timeouts possible |
+
+---
 
 ## What the dashboard shows
 
-| Area | What you see |
-|------|----------------|
-| **Welcome** | What the app does + **Load demo run** / **Run on local repo** |
+The UI is a **step-based sidebar** plus a main area with metrics, tabs, and export.
+
+```mermaid
+flowchart TB
+    SB[Sidebar: path → repo → prompt → run/load → export]
+    M[Metrics row]
+    T[Timeline tab]
+    S[Event summary chart]
+    TB[Event table]
+    PA[Prompt and answer]
+    RC[Review checks]
+    RP[Report preview]
+    SC[Project self-check]
+    SB --> M
+    M --> T
+    M --> S
+    M --> TB
+    M --> PA
+    M --> RC
+    M --> RP
+    M --> SC
+```
+
+| Tab / area | What you see |
+|------------|----------------|
+| **Welcome** (no trace yet) | What the app does; **Load demo run** / **Run on local repo** |
 | **Metrics** | Event count, duration, tool events, review checks passed |
-| **Timeline** | Order of events during the run |
-| **Event summary** | Bar or donut chart of event types |
-| **Event table** | Full trace as a sortable table |
-| **Prompt and answer** | What was sent and what came back |
-| **Review checks** | Pass/warn/fail checklist before sharing |
+| **Timeline** | Plotly chart: event order vs type |
+| **Event summary** | Bar or donut: counts by event type |
+| **Event table** | Sortable trace as a dataframe |
+| **Prompt and answer** | Input text and final assistant output |
+| **Review checks** | Pass / warn / fail gate cards + matrix |
 | **Report** | Markdown preview + download |
-| **Project self-check** | Offline scores for the demo project (not an LLM judgement) |
+| **Project self-check** | Deterministic scores (not an LLM judgement) |
 
-Sidebar is step-based: choose path → repo (if needed) → example prompt (local SDK only) → run/load → export.
+**Advanced (sidebar expander):** **Redacted live SDK timeout sample** — partial real capture for studying `status` / `error` events (see caveats).
 
-![Dashboard areas](assets/dashboard-callouts.png)
+---
 
 ## Local folders vs remote repos
 
 **Current support:**
 
-- **Local folders only** for live SDK runs (e.g. `examples/tiny_repo` or a path you cloned)
-- **Clone GitHub repos first**, then point at the local folder
-- **No direct remote GitHub URL** support in this app yet
+| Supported | Not supported yet |
+|-----------|-------------------|
+| Local folder path (e.g. `examples/tiny_repo`) | Remote GitHub URL in the app |
+| Clone a repo, then point at the clone | Direct “run against github.com/org/repo” |
+| Demo JSONL trace (no repo needed to view) | Multi-run comparison UI |
 
-The demo trace is a JSONL file—it does not “load” a repo into the app. The repo path is used for review checks and for live SDK runs.
+```mermaid
+flowchart LR
+    GH[GitHub repo online] -->|git clone| LOC[Local folder on disk]
+    LOC --> SDK[Cursor SDK local mode]
+    SDK --> FR[Flight Recorder]
+```
+
+**Repo path in the app** is used for:
+
+- **Review checks** (e.g. does the folder exist?),
+- **Live SDK runs** (SDK `cwd`),
+
+—not as a substitute for loading a trace when you use demo data.
+
+---
 
 ## Live SDK caveats
 
-- Cursor Python SDK is in **public beta**—event shapes may change
-- Local runs need `cursor-sdk` and credentials in `.env` (never committed)
-- The local bridge can **time out**; traces may be short or end in `error` status
-- Built-in example prompts are **read-only** (they ask the agent not to modify files)
-- This app does **not** prove a full successful live run in CI or in the committed sample below
+Be precise about what this repo proves:
 
-### Advanced: redacted SDK sample
+- Cursor Python SDK is in **public beta** — event shapes may change.
+- Live mode needs the **`cursor-sdk`** package and **local credentials** in `.env` (never committed).
+- The local **bridge can time out**; traces may be short or end with `error` status.
+- This project does **not** demonstrate a guaranteed **full successful** live run in CI or in the committed redacted sample.
+- Built-in prompts are read-only; the app does not enforce read-only at the SDK level.
 
-Load from the sidebar expander **Advanced: inspect redacted live SDK timeout sample**.
+### Redacted SDK sample (partial capture)
 
-The committed file `fixtures/live_sample_redacted.jsonl` is a **partial real** local SDK capture that ended in a **bridge timeout** (`run_status=error`). It demonstrates safe status/error capture, **not** a full successful tool-rich agent run.
+Under **Advanced → inspect redacted live SDK timeout sample**:
+
+`fixtures/live_sample_redacted.jsonl` is a **partial real** local SDK capture that ended in a **bridge timeout** (`run_status=error`). It shows that status/error events can be recorded safely after redaction—it is **not** a full successful tool-rich agent run.
+
+---
 
 ## Public safety
 
-- No secrets in the repository
-- `.env` is gitignored and never shown in the UI
-- `public_safety_scan()` flags secret-like patterns before you share a trace
-- Redacted live sample is safe to commit; raw live captures stay local
+- No secrets in the repository.
+- `.env` is gitignored; the UI never displays credential files.
+- `public_safety_scan()` flags secret-like patterns in trace text before sharing.
+- Redacted live sample is safe to commit; raw live captures stay local (`fixtures/_live_raw_temp.jsonl` is gitignored).
+
+---
 
 ## Development / tests
 
@@ -149,20 +328,93 @@ python scripts/ci_smoke.py
 python -c "import app"
 ```
 
-CI: `.github/workflows/ci.yml` (Python 3.11 and 3.13, no API key).
+[![CI](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml)
 
-After publishing to GitHub, you can add:
+GitHub Actions (`.github/workflows/ci.yml`): Python 3.11 and 3.13, `pytest`, `compileall`, report smoke, app import — **no live SDK credentials in CI**.
 
-```markdown
-![CI](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml/badge.svg)
+| Check | Command |
+|-------|---------|
+| Unit tests | `python -m pytest -v` |
+| Bytecode | `python -m compileall .` |
+| Fixture smoke | `python scripts/ci_smoke.py` |
+| App import | `python -c "import app"` |
+| Dashboard | `streamlit run app.py` |
+
+---
+
+## Mermaid architecture reference
+
+Editable diagrams for maintainers (also rendered on GitHub):
+
+**End-to-end pipeline:**
+
+```mermaid
+flowchart LR
+    A[Developer prompt] --> B[Cursor Python SDK optional]
+    B --> C[Normalized JSONL trace]
+    C --> D[Streamlit dashboard]
+    C --> E[Review gates]
+    D --> F[Markdown / HTML report]
+    E --> F
 ```
+
+**Module map:**
+
+```mermaid
+flowchart TB
+    app[app.py Streamlit UI]
+    runner[src/runner.py live SDK]
+    trace[src/trace.py JSONL I/O]
+    gates[src/gates.py review checks]
+    report[src/report.py export]
+    visuals[src/visuals.py charts]
+    redact[src/redact.py fixture redaction]
+    app --> trace
+    app --> gates
+    app --> report
+    app --> visuals
+    app --> runner
+    runner --> trace
+    gates --> report
+```
+
+---
+
+## Extra visuals
+
+<details>
+<summary><strong>Generated overview images (click to expand)</strong></summary>
+
+<br>
+
+<img src="assets/hero-flight-recorder.png" alt="Flight Recorder overview graphic" width="900">
+
+*Overview graphic.*
+
+<br>
+
+<img src="assets/sdk-modes.png" alt="Three ways to use Flight Recorder" width="900">
+
+*Three usage paths (illustration).*
+
+<br>
+
+<img src="assets/dashboard-callouts.png" alt="Dashboard areas callouts" width="900">
+
+*Dashboard areas (illustration).*
+
+</details>
+
+---
 
 ## Roadmap
 
-- Full successful live trace capture when bridge is stable
-- GitHub Actions gate summary on PRs
+- Reliable **full** live trace capture when the local bridge is stable
+- GitHub Actions gate summary on pull requests
 - Compare two runs side-by-side
-- Optional remote repo wiring when the SDK supports it clearly
+- Clearer remote-repo story if/when the SDK and this app support it explicitly
+
+---
 
 ## License
 
