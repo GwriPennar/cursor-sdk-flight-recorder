@@ -1,0 +1,11 @@
+# Normalize line endings for cross-platform clones
+* text=auto
+
+# Source
+*.py linguist-language=Python
+*.md linguist-detectable=true
+*.jsonl linguist-language=JSON
+
+# Treat generated reports as generated (optional diff noise reduction)
+reports/*.md linguist-generated=true
+reports/*.html linguist-generated=true

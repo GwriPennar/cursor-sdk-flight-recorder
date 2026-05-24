@@ -1,0 +1,100 @@
+# --- Secrets & local config (never commit) ---
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets.toml
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+pip-log.txt
+pip-delete-this-directory.txt
+
+# --- Virtual environments ---
+.venv/
+venv/
+ENV/
+env/
+
+# --- Packaging / installers ---
+*.manifest
+*.spec
+
+# --- Test & coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+nosetests.xml
+
+# --- Type checkers & linters ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+.pytype/
+
+# --- Jupyter ---
+.ipynb_checkpoints/
+
+# --- IDEs & OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- Streamlit ---
+.streamlit/secrets.toml
+
+# --- uv (optional tool) ---
+.uv/
+
+# --- Generated reports & live traces (keep directory placeholders) ---
+reports/*
+!reports/.gitkeep
+fixtures/_live_raw_temp.jsonl
+fixtures/live_*.jsonl
+!fixtures/live_sample_redacted.jsonl
+fixtures/*_live.jsonl
+traces/
+*.trace.jsonl
+
+# --- Logs & temp ---
+*.log
+logs/
+tmp/
+temp/
+
+# --- Local editor / agent artifacts ---
+.cursor/

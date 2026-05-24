@@ -1,0 +1,47 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cursor-sdk-flight-recorder"
+version = "0.1.0"
+description = "A visual dashboard for observing, gating, and sharing Cursor Python SDK agent runs."
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [{ name = "Cursor SDK Flight Recorder Contributors" }]
+keywords = ["cursor", "sdk", "agent", "observability", "streamlit"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries",
+]
+dependencies = [
+    "streamlit>=1.28",
+    "pandas>=2.0",
+    "plotly>=5.18",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4",
+    "rich>=13.0",
+]
+sdk = [
+    "cursor-sdk>=0.1",
+]
+
+[project.scripts]
+flight-recorder = "app:main"
+
+[tool.setuptools]
+packages = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
