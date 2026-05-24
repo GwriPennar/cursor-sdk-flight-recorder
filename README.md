@@ -4,9 +4,7 @@ A visual explainer for [Cursor Python SDK](https://cursor.com/docs/sdk/python) a
 
 **Run a Cursor SDK agent on a local repo, record what happened, review the trace, and export a report.**
 
-<img src="assets/screenshot.png" alt="Cursor SDK Flight Recorder Streamlit welcome screen" width="900">
-
-_Real Streamlit welcome screen. Click **Load demo run** to see the metrics, timeline, event table, review checks, and report export._
+Run `streamlit run app.py` and click **Load demo run** to explore the welcome screen, timeline, event table, review checks, and report export. Diagrams below use Mermaid only (no README image embeds).
 
 ## Why this exists
 
