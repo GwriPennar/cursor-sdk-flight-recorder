@@ -4,7 +4,9 @@ A visual explainer for [Cursor Python SDK](https://cursor.com/docs/sdk/python) a
 
 **Run a Cursor SDK agent on a local repo, record what happened, review the trace, and export a report.**
 
-Run `streamlit run app.py` and click **Load demo run** to explore the welcome screen, timeline, event table, review checks, and report export. Diagrams below use Mermaid only (no README image embeds).
+<img src="assets/screenshot.png" alt="Cursor SDK Flight Recorder Streamlit welcome screen" width="900">
+
+_Real app UI on first visit. Click **Load demo run** to see the timeline, metrics, event table, review checks, and report export._
 
 ## Why this exists
 
@@ -19,7 +21,7 @@ This repo is a public-safe educational demo. It is not a production observabilit
 Flight Recorder does five things:
 
 1. Runs or loads a Cursor SDK-style agent run.
-2. Records each step as JSONL events.
+2. Records the run as JSONL events.
 3. Shows the run as a timeline and table.
 4. Runs basic review checks.
 5. Exports a Markdown/HTML report.
@@ -46,92 +48,106 @@ python -m pytest
 streamlit run app.py
 ```
 
-Open http://localhost:8501 and click **Load demo run**. No credentials required for demo mode.
+Open [http://localhost:8501](http://localhost:8501) and click **Load demo run**. No API key is required.
 
-Optional local SDK:
+Optional local SDK mode:
 
 ```bash
 pip install -e ".[dev,sdk]"
 cp .env.example .env
 ```
 
-Add credentials locally in `.env` only. Never commit `.env`.
+Add your Cursor key to `.env` locally. Never commit `.env`.
 
-## Three ways to use it
+## How it works
 
-### Learn with demo data
+```mermaid
+flowchart LR
+    A[Demo trace] --> D[JSONL event trace]
+    B[Local SDK run] --> D
+    C[Uploaded JSONL] --> D
+    D --> E[Streamlit dashboard]
+    D --> F[Review checks]
+    E --> G[Markdown and HTML report]
+    F --> G
+```
 
-- Sidebar: Step 1, **Learn with demo data**, then **Load demo run**
-- Loads `fixtures/demo_trace.jsonl` (synthetic trace)
-- No credentials required
-- Best first step
-
-### Run Cursor SDK on a local repo
-
-- Sidebar: Step 1, **Run Cursor SDK on a local repo**
-- Set **local repo path** (folder on your machine)
-- Pick a built-in example prompt or custom text
-- Click **Run SDK agent**
-- Requires `cursor-sdk` and local credentials in `.env`
-
-### Review a saved trace
-
-- Sidebar: Step 1, **Review a saved trace**
-- Upload a `.jsonl` file (one JSON event per line)
-- Click **Load trace**
-- No credentials required
+The dashboard is not a replacement for Cursor. It is a small visual layer that helps you inspect a run after it happens.
 
 ## What is a trace?
 
-A trace is a JSONL file: one JSON object per line. Each object is an event (user prompt, tool action, assistant text, status, and so on).
+A trace is a JSONL file: one JSON object per line. Each object is an event from a run.
 
-**Load demo run** loads a trace file. It does not clone or import a Git repository into the app.
+Example event:
+
+```json
+{
+  "timestamp": "2026-05-24T10:00:01+00:00",
+  "type": "user",
+  "role": "user",
+  "summary": "User prompt received",
+  "content": "Summarize this repository.",
+  "status": "info",
+  "metadata": {}
+}
+```
+
+Common event types include `system`, `user`, `assistant`, `tool`, `status`, `gate`, `warning`, `error`, and `self_eval`.
+
+## Three ways to use it
+
+| Path | API key? | What happens | Best for |
+| --- | --- | --- | --- |
+| Learn with demo data | No | Loads `fixtures/demo_trace.jsonl` | First-time users |
+| Run Cursor SDK on a local repo | Yes | Runs the SDK against a local folder | Local SDK experiments |
+| Review a saved trace | No | Uploads a JSONL trace | Inspecting previous runs |
 
 ## What the dashboard shows
 
 | Area | What you see |
-|------|----------------|
-| Welcome | Onboarding and **Load demo run** |
+| --- | --- |
+| Welcome | What the app does and how to start |
 | Metrics | Event count, duration, tool events, review checks passed |
 | Timeline | Order of events during the run |
-| Event summary | Chart of event types |
-| Event table | Full trace as a table |
-| Prompt and answer | Input and final output |
-| Review checks | Pass, warn, or fail checklist |
+| Event summary | Bar or donut chart of event types |
+| Event table | Full trace as a sortable table |
+| Prompt and answer | What was sent and what came back |
+| Review checks | Pass, warn, and fail checklist before sharing |
 | Report | Markdown preview and download |
-
-Sidebar flow: choose path, repo if needed, example prompt for live SDK, run or load, export.
+| Project self-check | Offline scores for the demo project, not an LLM judgement |
 
 ## Local folders vs remote repos
 
-**Current support:**
+Current support:
 
-- Local folder paths only for live SDK runs (for example `examples/tiny_repo`)
-- Clone GitHub repos first, then point at the local folder
-- No direct remote GitHub URL support in this app yet
+- Local folders only for live SDK runs.
+- To use a GitHub repo, clone it first, then point Flight Recorder at the local folder.
+- Direct remote GitHub URL support is not implemented yet.
 
-The repo path is used for review checks and for live SDK `cwd`. It is not a substitute for loading demo trace data.
+```bash
+git clone https://github.com/example/project.git
+# Then point Flight Recorder at ./project
+```
 
 ## Live SDK caveats
 
-- Cursor Python SDK is in public beta. Event shapes may change.
-- Live mode needs `cursor-sdk` and local credentials in `.env` (never committed).
-- The local bridge can time out. Traces may be short or end with `error` status.
-- This project does **not** demonstrate a guaranteed full successful live run in CI or in the committed sample below.
-- Built-in example prompts are read-only style. The app does not enforce read-only at the SDK level.
+Be precise about what this repo proves:
 
-### Advanced: redacted SDK sample
+- Cursor Python SDK is in public beta; event shapes may change.
+- Live mode needs the `cursor-sdk` package and local credentials in `.env`.
+- The local bridge can time out; traces may be short or end with `error` status.
+- Built-in prompts are read-only, but the app does not enforce read-only at the SDK level.
+- This project does not demonstrate a guaranteed full successful live run in CI.
 
-Load from the sidebar expander **Advanced: inspect redacted live SDK timeout sample**.
-
-`fixtures/live_sample_redacted.jsonl` is a partial real local SDK capture that ended in a bridge timeout (`run_status=error`). It demonstrates safe status and error capture after redaction. It is **not** a full successful tool-rich agent run.
+The committed file `fixtures/live_sample_redacted.jsonl` is a partial real local SDK capture that ended in a bridge timeout (`run_status=error`). It demonstrates safe status/error capture, not a full successful tool-rich agent run.
 
 ## Public safety
 
-- No secrets in the repository
-- `.env` is gitignored. The UI never displays credential files
-- `public_safety_scan()` flags secret-like patterns in trace text
-- Redacted live sample is safe to commit. Raw live captures stay local
+- No secrets are committed.
+- `.env` is gitignored.
+- The UI never displays credential files.
+- `public_safety_scan()` flags secret-like patterns in trace text before sharing.
+- Raw live captures should stay local.
 
 ## Development and tests
 
@@ -142,27 +158,16 @@ python scripts/ci_smoke.py
 python -c "import app"
 ```
 
-[![CI](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/GwriPennar/cursor-sdk-flight-recorder/actions/workflows/ci.yml)
-
-CI uses Python 3.11 and 3.13. No live SDK credentials in CI.
-
-## How it works (overview)
-
-```mermaid
-flowchart LR
-    P[Local repo or demo trace] --> S[SDK run or saved trace]
-    S --> T[JSONL event trace]
-    T --> V[Timeline and review checks]
-    V --> R[Shareable report]
-```
+CI workflow: `.github/workflows/ci.yml`.
 
 ## Roadmap
 
-- Reliable full live trace capture when the local bridge is stable
-- GitHub Actions gate summary on pull requests
-- Compare two runs side by side
-- Clearer remote repo support if the SDK and this app add it later
+- Reliable full live trace capture when the local bridge is stable.
+- GitHub Actions gate summary on pull requests.
+- Compare two runs side-by-side.
+- Clearer remote-repo story if and when this app supports it explicitly.
+- Better HTML report rendering.
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
